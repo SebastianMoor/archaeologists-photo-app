@@ -1,0 +1,168 @@
+body {
+    
+    background-color: white;
+    height: 100vh;
+    width: 100%;
+}
+/* Reset some defaults */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.topbar {
+  background: #111;
+  color: white;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Nav links (desktop default) */
+.nav {
+  display: flex;
+  gap: 20px;
+}
+
+.nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+/* Hamburger button */
+.menu-toggle {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: #111;
+    flex-direction: column;
+    align-items: center;
+    display: none;
+    padding: 20px 0;
+  }
+
+  .nav.active {
+    display: flex;
+  }
+
+  .nav a {
+    padding: 12px 0;
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid #222;
+  }
+}
+.nav a:hover {
+  opacity: 0.7;
+}
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+@media (max-width: 600px) {
+  .nav {
+    display: none; /* hide links for now */
+  }
+}
+/* Reset */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Hero container */
+.hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Blurred background layer */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("archaeo\ photo\ img.jpeg") center/cover no-repeat;
+  filter: blur(8px);
+  transform: scale(1.1); /* prevents edges from showing after blur */
+  z-index: 0;
+}
+
+/* Content on top */
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: white;
+}
+
+/* Buttons container */
+.buttons {
+  margin-top: 20px;
+}
+
+/* Button styles */
+.btn {
+  padding: 12px 24px;
+  margin: 0 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 6px;
+}
+
+/* Primary button */
+.primary {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+/* Secondary button */
+.secondary {
+  background-color: transparent;
+  border: 2px solid white;
+  color: white;
+}
+
+/* Hover effects */
+.btn:hover {
+  opacity: 0.85;
+}
+.mini-map {
+  height: 180px;
+  width: 100%;
+  border-radius: 12px;
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}

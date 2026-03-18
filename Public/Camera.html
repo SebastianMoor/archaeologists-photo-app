@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Mobile Camera Form</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #111;
+    }
+
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    .header {
+      padding: 16px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: bold;
+      background: #1c1c1c;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .camera-wrap {
+      position: relative;
+      flex: 1;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      min-height: 50vh;
+    }
+
+    video,
+    canvas,
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+      display: block;
+    }
+
+    .controls {
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      background: #1c1c1c;
+      border-top: 1px solid #2a2a2a;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .primary {
+      background: #2d7ef7;
+      color: #fff;
+    }
+
+    .secondary {
+      background: #2b2b2b;
+      color: #fff;
+      border: 1px solid #444;
+    }
+
+    .form-wrap {
+      padding: 16px;
+      background: #111;
+      overflow-y: auto;
+    }
+
+    .photo-preview {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      overflow: hidden;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      background: #222;
+      border: 1px solid #2a2a2a;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      background: #1b1b1b;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    .desktop-warning {
+      display: none;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      background: #111;
+    }
+
+    .desktop-warning .box {
+      max-width: 360px;
+      background: #1b1b1b;
+      border: 1px solid #2f2f2f;
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .success-message {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #16341e;
+      border: 1px solid #2e6c3f;
+      display: none;
+    }
+
+    .location-status {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: #bbb;
+    }
+
+    @media (min-width: 769px) {
+      .app {
+        display: none;
+      }
+
+      .desktop-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container">
+      <div class="logo">Archaeology Photo Site</div>
+
+      <button class="menu-toggle" id="menuToggle" type="button">☰</button>
+
+      <nav class="nav" id="navMenu">
+        <a href="index.html">Home</a>
+        <a href="About.html">About</a>
+        <a href="Camera.html">Catalog</a>
+        <a href="admin.html">admin view</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="app">
+    <section id="cameraScreen" class="screen active">
+      <div class="header">Take a Photo</div>
+
+      <div class="camera-wrap">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+      </div>
+
+      <div class="controls">
+        <button id="captureBtn" class="primary" type="button">Take Photo</button>
+      </div>
+    </section>
+
+    <section id="formScreen" class="screen">
+      <div class="header">Complete the Form</div>
+
+      <div class="form-wrap">
+        <div class="photo-preview">
+          <img id="capturedImage" alt="Captured photo preview" />
+        </div>
+
+        <form id="detailsForm">
+          <div>
+            <label for="project">Project</label>
+            <select id="project" name="project" required>
+              <option value="">Select a project</option>
+              <option value="Roman Villa">Roman Villa</option>
+              <option value="Burial Site">Burial Site</option>
+              <option value="Town Dig">Town Dig</option>
+              <option value="Landscape Survey">Landscape Survey</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="name">Photo Name</label>
+            <input id="name" name="name" type="text" />
+          </div>
+
+          <div>
+            <label for="location">Location</label>
+            <input id="location" name="location" type="text" />
+          </div>
+
+          <div>
+            <label for="context">Context</label>
+            <input id="context" name="context" type="text" />
+          </div>
+
+          <div>
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" placeholder="Add details here"></textarea>
+          </div>
+
+          <div id="locationStatus" class="location-status">
+            Location will be captured when the photo is taken.
+          </div>
+
+          <div class="controls" style="padding: 0; background: transparent; border: 0; justify-content: flex-start;">
+            <button type="button" id="retakeBtn" class="secondary">Retake</button>
+            <button type="submit" class="primary">Submit</button>
+          </div>
+
+          <div id="successMessage" class="success-message">
+            Form submitted successfully.
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <div class="desktop-warning">
+    <div class="box">
+      <h2 style="margin-top:0;">Mobile only</h2>
+      <p style="margin-bottom:0;">
+        This page is designed for a mobile device with camera access.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+
+    if (menuToggle && navMenu) {
+      menuToggle.addEventListener("click", () => {
+        navMenu.classList.toggle("active");
+      });
+    }
+
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const captureBtn = document.getElementById("captureBtn");
+    const retakeBtn = document.getElementById("retakeBtn");
+    const capturedImage = document.getElementById("capturedImage");
+    const cameraScreen = document.getElementById("cameraScreen");
+    const formScreen = document.getElementById("formScreen");
+    const detailsForm = document.getElementById("detailsForm");
+    const successMessage = document.getElementById("successMessage");
+    const locationStatus = document.getElementById("locationStatus");
+
+    let stream = null;
+    let capturedBlob = null;
+    let capturedLocation = null;
+
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" }
+          },
+          audio: false
+        });
+
+        video.srcObject = stream;
+        await video.play();
+      } catch (error) {
+        console.error("Camera error:", error);
+        alert("Unable to access the camera. Use HTTPS or localhost and allow camera permissions.");
+      }
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+    }
+
+    function showFormScreen() {
+      cameraScreen.classList.remove("active");
+      formScreen.classList.add("active");
+    }
+
+    function showCameraScreen() {
+      formScreen.classList.remove("active");
+      cameraScreen.classList.add("active");
+    }
+
+    function getCurrentLocation() {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+          resolve(null);
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy
+            });
+          },
+          (error) => {
+            console.warn("Location error:", error);
+            resolve(null);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 30000
+          }
+        );
+      });
+    }
+
+    async function capturePhoto() {
+      if (!video.videoWidth || !video.videoHeight) {
+        alert("Camera is still loading. Please try again.");
+        return;
+      }
+
+      locationStatus.textContent = "Getting location...";
+
+      const context2d = canvas.getContext("2d");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context2d.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      capturedLocation = await getCurrentLocation();
+
+      if (capturedLocation) {
+        locationStatus.textContent =
+          `Location captured: ${capturedLocation.latitude.toFixed(5)}, ${capturedLocation.longitude.toFixed(5)}`;
+      } else {
+        locationStatus.textContent = "Location unavailable. The photo can still be submitted.";
+      }
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert("Could not capture photo.");
+          return;
+        }
+
+        capturedBlob = blob;
+        capturedImage.src = URL.createObjectURL(blob);
+
+        stopCamera();
+        showFormScreen();
+      }, "image/jpeg", 0.9);
+    }
+
+    captureBtn.addEventListener("click", capturePhoto);
+
+    retakeBtn.addEventListener("click", async () => {
+      capturedBlob = null;
+      capturedLocation = null;
+      capturedImage.src = "";
+      successMessage.style.display = "none";
+      detailsForm.reset();
+      locationStatus.textContent = "Location will be captured when the photo is taken.";
+      showCameraScreen();
+      await startCamera();
+    });
+
+    detailsForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!capturedBlob) {
+        alert("Please take a photo first.");
+        return;
+      }
+
+      const formData = new FormData(detailsForm);
+      formData.append("photo", capturedBlob, "photo.jpg");
+
+      if (capturedLocation) {
+        formData.append("latitude", capturedLocation.latitude);
+        formData.append("longitude", capturedLocation.longitude);
+        formData.append("accuracy", capturedLocation.accuracy);
+      }
+
+      try {
+        const response = await fetch("/api/submissions", {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Submission failed");
+        }
+
+        successMessage.textContent = "Form submitted successfully.";
+        successMessage.style.display = "block";
+
+        setTimeout(async () => {
+          detailsForm.reset();
+          capturedBlob = null;
+          capturedLocation = null;
+          capturedImage.src = "";
+          successMessage.style.display = "none";
+          locationStatus.textContent = "Location will be captured when the photo is taken.";
+          showCameraScreen();
+          await startCamera();
+        }, 1000);
+      } catch (error) {
+        console.error(error);
+        alert("Could not submit form");
+      }
+    });
+
+    startCamera();
+  </script>
+</body>
+</html>

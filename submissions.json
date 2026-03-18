@@ -1,0 +1,70 @@
+[
+  {
+    "id": "1773834369350",
+    "name": "d",
+    "location": "sa",
+    "context": "sa",
+    "project": "Town Dig",
+    "notes": "sa",
+    "latitude": 53.306084147558174,
+    "longitude": -6.201295488193743,
+    "accuracy": 35,
+    "photoFilename": "1773834369287-553849021.jpg",
+    "photoUrl": "/uploads/1773834369287-553849021.jpg",
+    "createdAt": "2026-03-18T11:46:09.350Z"
+  },
+  {
+    "id": "1773786423699",
+    "name": "Dh",
+    "location": "Dh",
+    "context": "Hx",
+    "project": "Burial Site",
+    "notes": "Hc",
+    "latitude": 53.32947647349848,
+    "longitude": -6.211040449761383,
+    "accuracy": 29.88131751164286,
+    "photoFilename": "1773786423693-263838842.jpg",
+    "photoUrl": "/uploads/1773786423693-263838842.jpg",
+    "createdAt": "2026-03-17T22:27:03.699Z"
+  },
+  {
+    "id": "1773775403858",
+    "name": "",
+    "location": "",
+    "context": "",
+    "notes": "",
+    "photoFilename": "1773775403768-734196967.jpg",
+    "photoUrl": "/uploads/1773775403768-734196967.jpg",
+    "createdAt": "2026-03-17T19:23:23.858Z"
+  },
+  {
+    "id": "1773771244338",
+    "name": "Roof",
+    "location": "location ",
+    "context": "West facing ",
+    "notes": "Test photo ",
+    "photoFilename": "1773771244332-591476667.jpg",
+    "photoUrl": "/uploads/1773771244332-591476667.jpg",
+    "createdAt": "2026-03-17T18:14:04.338Z"
+  },
+  {
+    "id": "1773769214187",
+    "name": "Traffic light",
+    "location": "Dublin",
+    "context": "…",
+    "notes": "🤫",
+    "photoFilename": "1773769214041-813367602.jpg",
+    "photoUrl": "/uploads/1773769214041-813367602.jpg",
+    "createdAt": "2026-03-17T17:40:14.187Z"
+  },
+  {
+    "id": "1773769048229",
+    "name": "Hello",
+    "location": "Dublin",
+    "context": "Spire",
+    "notes": "…",
+    "photoFilename": "1773769047999-424613083.jpg",
+    "photoUrl": "/uploads/1773769047999-424613083.jpg",
+    "createdAt": "2026-03-17T17:37:28.229Z"
+  }
+]

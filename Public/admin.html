@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submissions</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      color: #111;
+    }
+
+    header {
+      padding: 20px;
+      background: #111;
+      color: white;
+      text-align: center;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .card img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      display: block;
+      background: #ddd;
+    }
+
+    .card-content {
+      padding: 16px;
+    }
+
+    .card-content h3 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+    }
+
+    .meta {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      color: #444;
+    }
+
+    .notes {
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .project-section {
+      margin-bottom: 32px;
+    }
+
+    .project-title {
+      margin: 0 0 16px;
+      font-size: 1.4rem;
+    }
+
+    .delete-btn {
+      margin-top: 14px;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: #c62828;
+      color: white;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .delete-btn:hover {
+      opacity: 0.9;
+    }
+
+    .mini-map {
+      height: 180px;
+      width: 100%;
+      margin-top: 14px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <header></header>
+
+  <header class="topbar">
+    <div class="container">
+      <div class="logo">Archaeology Photo Site</div>
+
+      <button class="menu-toggle" id="menuToggle" type="button">☰</button>
+
+      <nav class="nav" id="navMenu">
+        <a href="index.html">Home</a>
+        <a href="About.html">About</a>
+        <a href="Camera.html">Catalog</a>
+        <a href="Upload.html">Upload</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="submissionsGrid"></div>
+  </main>
+
+  <script>
+    const submissionsGrid = document.getElementById("submissionsGrid");
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+
+    if (menuToggle && navMenu) {
+      menuToggle.addEventListener("click", () => {
+        navMenu.classList.toggle("active");
+      });
+    }
+
+    async function loadSubmissions() {
+      try {
+        const response = await fetch("/api/submissions");
+        const submissions = await response.json();
+
+        if (!response.ok) {
+          throw new Error("Could not load submissions");
+        }
+
+        if (!submissions.length) {
+          submissionsGrid.innerHTML = '<div class="empty">No submissions yet.</div>';
+          return;
+        }
+
+        const grouped = {};
+
+        submissions.forEach(item => {
+          const projectName = item.project || "Unassigned";
+          if (!grouped[projectName]) {
+            grouped[projectName] = [];
+          }
+          grouped[projectName].push(item);
+        });
+
+        submissionsGrid.innerHTML = Object.entries(grouped).map(([projectName, items]) => `
+          <section class="project-section">
+            <h2 class="project-title">${escapeHtml(projectName)}</h2>
+            <div class="grid">
+              ${items.map(item => `
+                <article class="card">
+                  <img src="${item.photoUrl}" alt="Submitted photo" />
+                  <div class="card-content">
+                    <h3>${escapeHtml(item.name || "Untitled photo")}</h3>
+                    <div class="meta"><strong>Project:</strong> ${escapeHtml(item.project || "-")}</div>
+                    <div class="meta"><strong>Location:</strong> ${escapeHtml(item.location || "-")}</div>
+                    <div class="meta"><strong>Context:</strong> ${escapeHtml(item.context || "-")}</div>
+                    <div class="meta"><strong>Date:</strong> ${new Date(item.createdAt).toLocaleString()}</div>
+                    <div class="notes"><strong>Notes:</strong><br>${escapeHtml(item.notes || "-")}</div>
+
+                    ${
+                      item.latitude && item.longitude
+                        ? `
+                          <div class="meta"><strong>GPS:</strong> ${Number(item.latitude).toFixed(5)}, ${Number(item.longitude).toFixed(5)}</div>
+                          <div class="meta"><strong>Accuracy:</strong> ${item.accuracy ? Math.round(Number(item.accuracy)) + " m" : "-"}</div>
+                          <div id="map-${item.id}" class="mini-map"></div>
+                        `
+                        : `
+                          <div class="meta"><strong>GPS:</strong> Not available</div>
+                        `
+                    }
+
+                    <button class="delete-btn" onclick="deleteSubmission('${item.id}')">Delete</button>
+                  </div>
+                </article>
+              `).join("")}
+            </div>
+          </section>
+        `).join("");
+
+        setTimeout(() => {
+          submissions.forEach(item => {
+            if (item.latitude && item.longitude) {
+              const mapElement = document.getElementById(`map-${item.id}`);
+              if (!mapElement) return;
+
+              const lat = Number(item.latitude);
+              const lng = Number(item.longitude);
+
+              const map = L.map(`map-${item.id}`, {
+                zoomControl: false,
+                attributionControl: true
+              }).setView([lat, lng], 15);
+
+              L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                maxZoom: 19,
+                attribution: "&copy; OpenStreetMap contributors"
+              }).addTo(map);
+
+              L.marker([lat, lng]).addTo(map);
+            }
+          });
+        }, 0);
+
+      } catch (error) {
+        console.error(error);
+        submissionsGrid.innerHTML = '<div class="empty">There was a problem loading submissions.</div>';
+      }
+    }
+
+    async function deleteSubmission(id) {
+      const confirmed = confirm("Delete this photo?");
+      if (!confirmed) return;
+
+      try {
+        const response = await fetch(`/api/submissions/${id}`, {
+          method: "DELETE"
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Delete failed");
+        }
+
+        loadSubmissions();
+      } catch (error) {
+        console.error(error);
+        alert("Could not delete submission");
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text || "";
+      return div.innerHTML;
+    }
+
+    loadSubmissions();
+  </script>
+</body>
+</html>
